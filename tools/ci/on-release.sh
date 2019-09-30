@@ -97,21 +97,12 @@ function git_upload_to_pages(){
     echo "$data" | curl -s -k -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.raw+json" -X PUT --data @- "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/$path"
 }
 
-# good time to build the assets
-#if [ $RELEASE_PRE == "true" ]; then
-#	echo "It's a pre-release"
-#fi
-
-# upload asset to the release page
-#git_upload_asset ./README.md
-
-# upload file to github pages
-#git_upload_to_pages README.md ./README.md
-
 export OUTPUT_DIR="$GITHUB_WORKSPACE/build"
 mkdir -p "$OUTPUT_DIR"
 
 source "$GITHUB_WORKSPACE/tools/ci/create-package-zip.sh"
+source "$GITHUB_WORKSPACE/tools/ci/create-package-json.sh"
+source "$GITHUB_WORKSPACE/tools/ci/create-release-notes.sh"
 
 set -e
 echo "Generating submodules.txt ..."
@@ -120,8 +111,6 @@ echo "Uploading submodules.txt ..."
 echo "Download URL: "`git_safe_upload_asset "$OUTPUT_DIR/submodules.txt"`
 echo ""
 set +e
-
-source "$GITHUB_WORKSPACE/tools/ci/create-package-json.sh"
 
 
 
