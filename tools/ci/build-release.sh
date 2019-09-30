@@ -112,7 +112,7 @@ echo
 echo "Prequisite check:"
 if [ -z "$TRAVIS_BUILD_DIR" ]; then
 	echo " - non-TravisCI environment"
-    cd "$( dirname ${BASH_SOURCE[0]} )"/..
+    cd "$( dirname ${BASH_SOURCE[0]} )"/../..
 	bTravisRun=0
 else
 	echo " - TravisCI run"

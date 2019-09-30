@@ -7,17 +7,17 @@ fi
 
 EVENT_JSON=`cat $GITHUB_EVENT_PATH`
 action=`echo $EVENT_JSON | jq -r '.action'`
-draft=`echo $EVENT_JSON | jq -r '.release.draft'`
-prerelease=`echo $EVENT_JSON | jq -r '.release.prerelease'`
-tag=`echo $EVENT_JSON | jq -r '.release.tag_name'`
-branch=`echo $EVENT_JSON | jq -r '.release.target_commitish'`
-release_id=`echo $EVENT_JSON | jq -r '.release.id'`
+export RELEASE_DRAFT=`echo $EVENT_JSON | jq -r '.release.draft'`
+export RELEASE_PRE=`echo $EVENT_JSON | jq -r '.release.prerelease'`
+export RELEASE_TAG=`echo $EVENT_JSON | jq -r '.release.tag_name'`
+export RELEASE_BRANCH=`echo $EVENT_JSON | jq -r '.release.target_commitish'`
+export RELEASE_ID=`echo $EVENT_JSON | jq -r '.release.id'`
 
 echo "Event: $GITHUB_EVENT_NAME, Repo: $GITHUB_REPOSITORY, Path: $GITHUB_WORKSPACE, Ref: $GITHUB_REF"
-echo "Action: $action, Branch: $branch, ID: $release_id" 
-echo "Tag: $tag, Draft: $draft, Pre-Release: $prerelease"
+echo "Action: $action, Branch: $RELEASE_BRANCH, ID: $RELEASE_ID" 
+echo "Tag: $RELEASE_TAG, Draft: $RELEASE_DRAFT, Pre-Release: $RELEASE_PRE"
 
-if [ $draft == "true" ]; then
+if [ $RELEASE_DRAFT == "true" ]; then
 	echo "It's a draft release. Exiting now..."
 	exit 0
 fi
@@ -30,7 +30,7 @@ fi
 function git_upload_asset(){
     local name=$(basename "$1")
     local mime=$(file -b --mime-type "$1")
-    curl -k -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.raw+json" -H "Content-Type: $mime" --data "@$1" "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$release_id/assets?name=$name"
+    curl -k -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.raw+json" -H "Content-Type: $mime" --data "@$1" "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=$name"
 }
 
 function git_upload_to_pages(){
@@ -66,12 +66,42 @@ function git_upload_to_pages(){
 }
 
 # good time to build the assets
-if [ $prerelease == "true" ]; then
-	echo "It's a pre-release"
-fi
+#if [ $RELEASE_PRE == "true" ]; then
+#	echo "It's a pre-release"
+#fi
 
 # upload asset to the release page
-git_upload_asset ./README.md
+#git_upload_asset ./README.md
 
 # upload file to github pages
-git_upload_to_pages README.md ./README.md
+#git_upload_to_pages README.md ./README.md
+
+export OUTPUT_DIR="$GITHUB_WORKSPACE/build"
+mkdri -p "$OUTPUT_DIR"
+
+source "$GITHUB_WORKSPACE/tools/ci/create-package-zip.sh"
+
+set -e
+
+echo "Generating submodules.txt ..."
+git -C "$GITHUB_WORKSPACE" submodule status > "$OUTPUT_DIR/submodules.txt"
+
+git_upload_asset "$PKG_PATH"
+git_upload_asset "$OUTPUT_DIR/submodules.txt"
+
+set +e
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
