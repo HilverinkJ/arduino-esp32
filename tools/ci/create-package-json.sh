@@ -18,11 +18,11 @@ function downloadAndMergePackageJSON(){
 	set -v
 	if [ ! -s $merged_json ]; then
 		rm -f "$merged_json"
-		echo " Done: nothing to merge ($merged_json empty) => $jsonOut remains unchanged"
+		echo "Nothing to merge"
 	else
 		rm -f "$jsonOut"
 		mv "$merged_json" "$jsonOut"
-		echo " Done: JSON data successfully merged to $jsonOut"
+		echo "JSON data successfully merged"
 	fi
 	rm -f "$old_json"
 	set +v
@@ -31,25 +31,20 @@ function downloadAndMergePackageJSON(){
 echo "Getting previous releases ..."
 releasesJson=`curl -sH "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/$GITHUB_REPOSITORY/releases`
 if [ $? -ne 0 ]; then echo "ERROR: Get Releases Failed! ($?)"; exit 1; fi
-echo "$releasesJson"
 
 prev_release=$(echo "$releasesJson" | jq -e -r '. | map(select(.draft == false and .prerelease == false)) | sort_by(.created_at | - fromdateiso8601) | .[0].tag_name')
 prev_any_release=$(echo "$releasesJson" | jq -e -r '. | map(select(.draft == false)) | sort_by(.created_at | - fromdateiso8601)  | .[0].tag_name')
-prev_pre_release=$(echo "$releasesJson" | jq -e -r '. | map(select(.draft == false and .prerelease == true)) | sort_by(.created_at | - fromdateiso8601)  | .[0].tag_name')
-
 shopt -s nocasematch
 if [ "$prev_any_release" == "$RELEASE_TAG" ]; then
 	prev_release=$(echo "$releasesJson" | jq -e -r '. | map(select(.draft == false and .prerelease == false)) | sort_by(.created_at | - fromdateiso8601) | .[1].tag_name')
 	prev_any_release=$(echo "$releasesJson" | jq -e -r '. | map(select(.draft == false)) | sort_by(.created_at | - fromdateiso8601)  | .[1].tag_name')
-	prev_pre_release=$(echo "$releasesJson" | jq -e -r '. | map(select(.draft == false and .prerelease == true)) | sort_by(.created_at | - fromdateiso8601)  | .[1].tag_name')
 fi
 shopt -u nocasematch
 
-set -e
+echo "Previous Release: $prev_release"
+echo "Previous (any)release: $prev_any_release"
 
-echo "     previous Release: $prev_release"
-echo "     previous Pre-release: $prev_pre_release"
-echo "     previous (any)release: $prev_any_release"
+set -e
 
 # add generated items to JSON package-definition contents
 jq_arg=".packages[0].platforms[0].version = \"$RELEASE_TAG\" | \
