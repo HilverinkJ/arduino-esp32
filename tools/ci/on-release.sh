@@ -70,7 +70,7 @@ function git_upload_to_pages(){
     local src=$2
 
     if [ ! -f "$src" ]; then
-        echo "Input is not a file! Aborting..."
+        >&2 echo "Input is not a file! Aborting..."
         return 1
     fi
 
@@ -85,7 +85,7 @@ function git_upload_to_pages(){
         sha=",\"sha\":\"$sha\""
         message="Updating $message"
     elif [ ! $type == "null" ]; then
-        echo "Wrong type '$type'"
+        >&2 echo "Wrong type '$type'"
         return 1
     else
         message="Creating $message"
@@ -95,6 +95,26 @@ function git_upload_to_pages(){
     data="{\"branch\":\"gh-pages\",\"message\":\"$message\",\"content\":\"$content\"$sha}"
 
     echo "$data" | curl -s -k -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.raw+json" -X PUT --data @- "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/$path"
+}
+
+function git_safe_upload_to_pages(){
+    local path=$1
+    local file="$2"
+    local name=$(basename "$file")
+    local size=`get_file_size "$file"`
+    local upload_res=`git_upload_to_pages "$path" "$file"`
+    if [ $? -ne 0 ]; then 
+        >&2 echo "ERROR: Failed to upload '$name' ($?)"
+        return 1
+    fi
+    up_size=`echo "$upload_res" | jq -r '.content.size'`
+    if [ $up_size -ne $size ]; then
+        >&2 echo "ERROR: Uploaded size does not match! $up_size != $size"
+        #git_delete_asset
+        return 1
+    fi
+    echo "$upload_res" | jq -r '.content.download_url'
+    return $?
 }
 
 export OUTPUT_DIR="$GITHUB_WORKSPACE/build"

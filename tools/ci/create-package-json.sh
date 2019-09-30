@@ -67,7 +67,7 @@ if [ ! -z "$prev_any_release" ] && [ "$prev_any_release" != "null" ]; then
 fi
 echo "Uploading $PACKAGE_JSON_DEV ..."
 echo "Download URL: "`git_safe_upload_asset "$OUTPUT_DIR/$PACKAGE_JSON_DEV"`
-git_upload_to_pages "$PACKAGE_JSON_DEV" "$OUTPUT_DIR/$PACKAGE_JSON_DEV"
+echo "Pages URL: "`git_safe_upload_to_pages "$PACKAGE_JSON_DEV" "$OUTPUT_DIR/$PACKAGE_JSON_DEV"`
 
 # for RELEASE run update REL JSON as well
 if [ "$RELEASE_PRE" == "false" ]; then
@@ -79,7 +79,7 @@ if [ "$RELEASE_PRE" == "false" ]; then
 	fi
 	echo "Uploading $PACKAGE_JSON_REL ..."
 	echo "Download URL: "`git_safe_upload_asset "$OUTPUT_DIR/$PACKAGE_JSON_REL"`
-	git_upload_to_pages "$PACKAGE_JSON_REL" "$OUTPUT_DIR/$PACKAGE_JSON_REL"
+	echo "Pages URL: "`git_safe_upload_to_pages "$PACKAGE_JSON_REL" "$OUTPUT_DIR/$PACKAGE_JSON_REL"`
 fi
 
 echo "JSON definition file(s) created"
