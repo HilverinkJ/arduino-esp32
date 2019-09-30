@@ -58,12 +58,13 @@ rm -rf "$PKG_DIR"
 echo "'$PKG_ZIP' Created! Size: $PKG_SIZE, SHA256: $PKG_SHA"
 
 echo "Uploading package to release page ..."
-export PKG_URL=`git_safe_upload_asset "$PKG_PATH"`
+PKG_URL=`git_safe_upload_asset "$PKG_PATH"`
 if [ $? -ne 0 ]; then 
 	echo "ERROR: Failed to upload $PKG_ZIP ($?)"
 	exit 1
 fi
-echo "Package Uploaded"
+export PKG_URL
+echo "Package Uploaded ($?)"
 echo "Download URL: $PKG_URL"
 echo ""
 
