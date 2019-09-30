@@ -14,4 +14,4 @@ jobs:
     - name: Build Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: bash ./tools/ci/release.sh
+      run: bash ./tools/ci/on-release.sh
