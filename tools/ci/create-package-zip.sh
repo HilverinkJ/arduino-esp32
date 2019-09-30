@@ -57,4 +57,12 @@ popd >/dev/null
 rm -rf "$PKG_DIR"
 echo "'$PKG_ZIP' Created! Size: $PKG_SIZE, SHA256: $PKG_SHA"
 
+echo "Uploading package to release page ..."
+pkg_size=`git_upload_asset "$PKG_PATH" | jq -r '.size'`
+if [ "$pkg_size" -ne "$PKG_SIZE" ]; then
+    echo "ERROR: PKG Size does not match! $pkg_size != $PKG_SIZE"
+fi
+echo "Package Uploaded"
+echo ""
+
 set +e

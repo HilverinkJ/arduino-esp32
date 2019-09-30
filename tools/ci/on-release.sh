@@ -86,7 +86,6 @@ set -e
 echo "Generating submodules.txt ..."
 git -C "$GITHUB_WORKSPACE" submodule status > "$OUTPUT_DIR/submodules.txt"
 
-git_upload_asset "$PKG_PATH"
 git_upload_asset "$OUTPUT_DIR/submodules.txt"
 
 set +e
