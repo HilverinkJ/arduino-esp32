@@ -77,7 +77,7 @@ function git_upload_to_pages(){
 #git_upload_to_pages README.md ./README.md
 
 export OUTPUT_DIR="$GITHUB_WORKSPACE/build"
-mkdri -p "$OUTPUT_DIR"
+mkdir -p "$OUTPUT_DIR"
 
 source "$GITHUB_WORKSPACE/tools/ci/create-package-zip.sh"
 

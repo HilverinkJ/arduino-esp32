@@ -61,6 +61,7 @@ echo "Uploading package to release page ..."
 pkg_size=`git_upload_asset "$PKG_PATH" | jq -r '.size'`
 if [ "$pkg_size" -ne "$PKG_SIZE" ]; then
     echo "ERROR: PKG Size does not match! $pkg_size != $PKG_SIZE"
+    exit 1
 fi
 echo "Package Uploaded"
 echo ""
