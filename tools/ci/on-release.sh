@@ -52,12 +52,12 @@ function git_safe_upload_asset(){
     local size=`get_file_size "$file"`
     local upload_res=`git_upload_asset "$file"`
     if [ $? -ne 0 ]; then 
-        echo "ERROR: Failed to upload '$name' ($?)"
+        >&2 echo "ERROR: Failed to upload '$name' ($?)"
         return 1
     fi
     up_size=`echo "$upload_res" | jq -r '.size'`
     if [ $up_size -ne $size ]; then
-        echo "ERROR: Uploaded size does not match! $up_size != $size"
+        >&2 echo "ERROR: Uploaded size does not match! $up_size != $size"
         #git_delete_asset
         return 1
     fi
