@@ -43,7 +43,7 @@ function get_file_size(){
 function git_upload_asset(){
     local name=$(basename "$1")
     # local mime=$(file -b --mime-type "$1")
-    curl -k -X POST -sH "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/octet-stream" -data-binary @"$1" "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=$name"
+    curl -k -X POST -sH "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/octet-stream" --data-binary @"$1" "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=$name"
 }
 
 function git_safe_upload_asset(){
