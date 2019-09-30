@@ -121,6 +121,8 @@ echo "Download URL: "`git_safe_upload_asset "$OUTPUT_DIR/submodules.txt"`
 echo ""
 set +e
 
+source "$GITHUB_WORKSPACE/tools/ci/create-package-json.sh"
+
 
 
 

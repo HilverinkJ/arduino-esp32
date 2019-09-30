@@ -50,21 +50,20 @@ zip -qr "$PKG_ZIP" "$PKG_NAME"
 if [ $? -ne 0 ]; then echo "ERROR: Failed to create $PKG_ZIP ($?)"; exit 1; fi
 
 echo "Calculating SHA sum ..."
-export PKG_PATH="$OUTPUT_DIR/$PKG_ZIP"
-export PKG_SHA=`shasum -a 256 "$PKG_ZIP" | cut -f 1 -d ' '`
-export PKG_SIZE=`get_file_size "$PKG_ZIP"`
+PKG_PATH="$OUTPUT_DIR/$PKG_ZIP"
+PKG_SHA=`shasum -a 256 "$PKG_ZIP" | cut -f 1 -d ' '`
+PKG_SIZE=`get_file_size "$PKG_ZIP"`
 popd >/dev/null
 rm -rf "$PKG_DIR"
-echo "'$PKG_ZIP' Created! Size: $PKG_SIZE, SHA256: $PKG_SHA"
+echo "'$PKG_ZIP' Created! Size: $PKG_SIZE, SHA-256: $PKG_SHA"
 
 echo "Uploading package to release page ..."
 PKG_URL=`git_safe_upload_asset "$PKG_PATH"`
-if [ $? -ne 0 ]; then 
-	echo "ERROR: Failed to upload $PKG_ZIP ($?)"
-	exit 1
-fi
 export PKG_URL
-echo "Package Uploaded ($?)"
+export PKG_SHA
+export PKG_SIZE
+export PKG_ZIP
+echo "Package Uploaded"
 echo "Download URL: $PKG_URL"
 echo ""
 
