@@ -86,7 +86,7 @@ if [ "$RELEASE_PRE" == "false" ]; then
 	echo "Download URL: "`git_safe_upload_asset "$OUTPUT_DIR/$PACKAGE_JSON_REL"`
 fi
 
+echo "JSON definition file(s) created"
 echo
-echo "JSON definition file(s) creation OK"
 
 set +e
