@@ -57,25 +57,6 @@ popd >/dev/null
 rm -rf "$PKG_DIR"
 echo "'$PKG_ZIP' Created! Size: $PKG_SIZE, SHA256: $PKG_SHA"
 
-function git_safe_upload_asset(){
-	local file="$1"
-	local name=$(basename "$file")
-	local size=`get_file_size "$file"`
-	local upload_res=`git_upload_asset "$file"`
-	if [ $? -ne 0 ]; then 
-		echo "ERROR: Failed to upload '$name' ($?)"
-		return 1
-	fi
-	up_size=`echo "$upload_res" | jq -r '.size'`
-	if [ "$up_size" -ne "$size" ]; then
-	    echo "ERROR: Uploaded size does not match! $up_size != $size"
-	    #git_delete_asset
-	    return 1
-	fi
-	echo "$upload_res" | jq -r '.browser_download_url'
-	return $?
-}
-
 echo "Uploading package to release page ..."
 export PKG_URL=`git_safe_upload_asset "$PKG_PATH"`
 if [ $? -ne 0 ]; then 
@@ -83,6 +64,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 echo "Package Uploaded"
+echo "Download URL: $PKG_URL"
 echo ""
 
 set +e

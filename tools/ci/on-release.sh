@@ -46,6 +46,25 @@ function git_upload_asset(){
     curl -k -X POST -sH "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.raw+json" -H "Content-Type: application/octet-stream" -data-binary @"$1" "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=$name"
 }
 
+function git_safe_upload_asset(){
+    local file="$1"
+    local name=$(basename "$file")
+    local size=`get_file_size "$file"`
+    local upload_res=`git_upload_asset "$file"`
+    if [ $? -ne 0 ]; then 
+        echo "ERROR: Failed to upload '$name' ($?)"
+        return 1
+    fi
+    up_size=`echo "$upload_res" | jq -r '.size'`
+    if [ $up_size -ne $size ]; then
+        echo "ERROR: Uploaded size does not match! $up_size != $size"
+        #git_delete_asset
+        return 1
+    fi
+    echo "$upload_res" | jq -r '.browser_download_url'
+    return $?
+}
+
 function git_upload_to_pages(){
     local path=$1
     local src=$2
@@ -95,12 +114,11 @@ mkdir -p "$OUTPUT_DIR"
 source "$GITHUB_WORKSPACE/tools/ci/create-package-zip.sh"
 
 set -e
-
 echo "Generating submodules.txt ..."
 git -C "$GITHUB_WORKSPACE" submodule status > "$OUTPUT_DIR/submodules.txt"
-
-git_upload_asset "$OUTPUT_DIR/submodules.txt"
-
+echo "Uploading submodules.txt ..."
+echo "Download URL: "`git_safe_upload_asset "$OUTPUT_DIR/submodules.txt"`
+echo ""
 set +e
 
 
