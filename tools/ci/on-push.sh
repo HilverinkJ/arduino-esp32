@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "Skipping Test: delete this line if you want it not to."
+exit 0
+
 if [ ! -z "$TRAVIS_TAG" ]; then
 	echo "Skipping Test: Tagged build"
 	exit 0
