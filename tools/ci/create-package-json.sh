@@ -69,9 +69,9 @@ if [ ! -z "$prev_any_release" ] && [ "$prev_any_release" != "null" ]; then
 	downloadAndMergePackageJSON "$prev_any_release/$PACKAGE_JSON_DEV" "$OUTPUT_DIR/$PACKAGE_JSON_DEV"
 	echo "Getting commits from $prev_any_release ..."
 	git -C "$GITHUB_WORKSPACE" log --oneline $prev_any_release.. > "$OUTPUT_DIR/commits.txt"
-	echo "Uploading $PACKAGE_JSON_DEV ..."
-	echo "Download URL: "`git_safe_upload_asset "$OUTPUT_DIR/$PACKAGE_JSON_DEV"`
-fi	
+fi
+echo "Uploading $PACKAGE_JSON_DEV ..."
+echo "Download URL: "`git_safe_upload_asset "$OUTPUT_DIR/$PACKAGE_JSON_DEV"`
 
 # for RELEASE run update REL JSON as well
 if [ "$RELEASE_PRE" == "false" ]; then
@@ -81,9 +81,9 @@ if [ "$RELEASE_PRE" == "false" ]; then
 		downloadAndMergePackageJSON "$prev_release/$PACKAGE_JSON_REL" "$OUTPUT_DIR/$PACKAGE_JSON_REL"
 		echo "Getting commits from $prev_release ..."
 		git -C "$GITHUB_WORKSPACE" log --oneline $prev_release.. > "$OUTPUT_DIR/commits.txt"
-		echo "Uploading $PACKAGE_JSON_REL ..."
-		echo "Download URL: "`git_safe_upload_asset "$OUTPUT_DIR/$PACKAGE_JSON_REL"`
 	fi
+	echo "Uploading $PACKAGE_JSON_REL ..."
+	echo "Download URL: "`git_safe_upload_asset "$OUTPUT_DIR/$PACKAGE_JSON_REL"`
 fi
 
 echo
