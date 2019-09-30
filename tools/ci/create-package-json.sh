@@ -42,7 +42,7 @@ if [ "$prev_any_release" == "$RELEASE_TAG" ]; then
 	prev_release=$(echo "$releasesJson" | jq -e -r '. | map(select(.draft == false and .prerelease == false)) | sort_by(.created_at | - fromdateiso8601) | .[1].tag_name')
 	prev_any_release=$(echo "$releasesJson" | jq -e -r '. | map(select(.draft == false)) | sort_by(.created_at | - fromdateiso8601)  | .[1].tag_name')
 fi
-commits_release="$prev_any_release"
+COMMITS_SINCE_RELEASE="$prev_any_release"
 shopt -u nocasematch
 
 echo "Previous Release: $prev_release"
@@ -70,7 +70,7 @@ echo "Download URL: "`git_safe_upload_asset "$OUTPUT_DIR/$PACKAGE_JSON_DEV"`
 
 # for RELEASE run update REL JSON as well
 if [ "$RELEASE_PRE" == "false" ]; then
-	commits_release="$prev_release"
+	COMMITS_SINCE_RELEASE="$prev_release"
 	echo "Genarating $PACKAGE_JSON_REL ..."
 	cat "$GITHUB_WORKSPACE/package/package_esp32_index.template.json" | jq "$jq_arg" > "$OUTPUT_DIR/$PACKAGE_JSON_REL"
 	if [ ! -z "$prev_release" ] && [ "$prev_release" != "null" ]; then
@@ -83,11 +83,7 @@ fi
 echo "JSON definition file(s) created"
 echo
 
-if [ ! -z "$commits_release" ] && [ "$commits_release" != "null" ]; then
-	echo "Getting commits from $commits_release ..."
-	git -C "$GITHUB_WORKSPACE" log --oneline $commits_release.. > "$OUTPUT_DIR/commits.txt"
-fi
-
+export COMMITS_SINCE_RELEASE
 
 #
 # Prepare Markdown release notes:
@@ -99,11 +95,7 @@ fi
 #	remaining lines: each converted to bullet-list item
 #	empty lines ignored
 #	if '* ' found as a first char pair, it's converted to '- ' to keep bulleting unified
-echo
-echo Preparing release notes
-echo -----------------------
-echo "Tag's message:"
-
+echo "Preparing release notes ..."
 relNotesRaw=`git -C "$GITHUB_WORKSPACE" show -s --format=%b $RELEASE_TAG`
 readarray -t msgArray <<<"$relNotesRaw"
 arrLen=${#msgArray[@]}
@@ -132,29 +124,59 @@ if [ $arrLen > 3 ] && [ "${msgArray[0]:0:3}" == "tag" ]; then
 	done
 fi
 
-echo "$releaseNotes"
-
-# - list of commits (commits.txt must exit in the output dir)
-commitFile=$OUTPUT_DIR/commits.txt
-if [ -s "$commitFile" ]; then
-	
+if [ ! -z "$COMMITS_SINCE_RELEASE" ] && [ "$COMMITS_SINCE_RELEASE" != "null" ]; then
+	echo "Getting commits from $COMMITS_SINCE_RELEASE ..."
+	commitFile=$OUTPUT_DIR/commits.txt
+	git -C "$GITHUB_WORKSPACE" log --oneline $COMMITS_SINCE_RELEASE.. > "$OUTPUT_DIR/commits.txt"
 	releaseNotes+=$'\r\n##### Commits\r\n'
-	
-	echo
-	echo "Commits:"
-		
 	IFS=$'\n'
 	for next in `cat $commitFile`
 	do
 		IFS=' ' read -r commitId commitMsg <<< "$next"
-		commitLine="- [$commitId](https://github.com/$varRepoSlug/commit/$commitId) $commitMsg"
-		echo "   $commitLine"
-		
+		commitLine="- [$commitId](https://github.com/$GITHUB_REPOSITORY/commit/$commitId) $commitMsg"
 		releaseNotes+="$commitLine"
 		releaseNotes+=$'\r\n'
 	done
 	rm -f $commitFile
 fi
 
+echo "Tag's message:"
+echo "$releaseNotes"
+echo
 
+	#Merge release notes and overwrite pre-release flag. all other attributes remain unchanged:
+	
+	# 1. take existing notes from server (added by release creator)
+	releaseNotesGH=$(echo $EVENT_JSON | jq -r '.release.body')
+	
+	# - strip possibly trailing CR
+	if [ "${releaseNotesGH: -1}" == $'\r' ]; then 		
+		releaseNotesTemp="${releaseNotesGH:0:-1}"
+	else 
+		releaseNotesTemp="$releaseNotesGH"
+	fi
+	# - add CRLF to make relnotes consistent for JSON encoding
+	releaseNotesTemp+=$'\r\n'
+	
+	# 2. #append generated relnotes (usually commit oneliners)
+	releaseNotes="$releaseNotesTemp$releaseNotes"
+	
+	# 3. JSON-encode whole string for GH API transfer
+	releaseNotes=$(json_escape "$releaseNotes")
+	
+	# 4. remove extra quotes returned by python (dummy but whatever)
+	releaseNotes=${releaseNotes:1:-1}
+	
+	#Update current GH release record
+	echo " - updating release notes and pre-release flag:"
+	
+	curlData="{\"body\": \"$releaseNotes\",\"prerelease\": $RELEASE_PRE}"
+	echo "   <data.begin>$curlData<data.end>"
+	echo
+	
+	curl --data "$curlData" "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID?access_token=$GITHUB_TOKEN"
+	if [ $? -ne 0 ]; then echo "FAILED: $? => aborting"; exit 1; fi
+	
+	echo " - release record successfully updated"
+	
 set +e
