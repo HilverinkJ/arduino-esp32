@@ -144,39 +144,39 @@ echo "Tag's message:"
 echo "$releaseNotes"
 echo
 
-	#Merge release notes and overwrite pre-release flag. all other attributes remain unchanged:
-	
-	# 1. take existing notes from server (added by release creator)
-	releaseNotesGH=$(echo $EVENT_JSON | jq -r '.release.body')
-	
-	# - strip possibly trailing CR
-	if [ "${releaseNotesGH: -1}" == $'\r' ]; then 		
-		releaseNotesTemp="${releaseNotesGH:0:-1}"
-	else 
-		releaseNotesTemp="$releaseNotesGH"
-	fi
-	# - add CRLF to make relnotes consistent for JSON encoding
-	releaseNotesTemp+=$'\r\n'
-	
-	# 2. #append generated relnotes (usually commit oneliners)
-	releaseNotes="$releaseNotesTemp$releaseNotes"
-	
-	# 3. JSON-encode whole string for GH API transfer
-	releaseNotes=$(json_escape "$releaseNotes")
-	
-	# 4. remove extra quotes returned by python (dummy but whatever)
-	releaseNotes=${releaseNotes:1:-1}
-	
-	#Update current GH release record
-	echo " - updating release notes and pre-release flag:"
-	
-	curlData="{\"body\": \"$releaseNotes\",\"prerelease\": $RELEASE_PRE}"
-	echo "   <data.begin>$curlData<data.end>"
-	echo
-	
-	curl --data "$curlData" "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID?access_token=$GITHUB_TOKEN"
-	if [ $? -ne 0 ]; then echo "FAILED: $? => aborting"; exit 1; fi
-	
-	echo " - release record successfully updated"
-	
+#Merge release notes and overwrite pre-release flag. all other attributes remain unchanged:
+
+# 1. take existing notes from server (added by release creator)
+releaseNotesGH=$(echo $EVENT_JSON | jq -r '.release.body')
+
+# - strip possibly trailing CR
+if [ "${releaseNotesGH: -1}" == $'\r' ]; then 		
+	releaseNotesTemp="${releaseNotesGH:0:-1}"
+else 
+	releaseNotesTemp="$releaseNotesGH"
+fi
+# - add CRLF to make relnotes consistent for JSON encoding
+releaseNotesTemp+=$'\r\n'
+
+# 2. #append generated relnotes (usually commit oneliners)
+releaseNotes="$releaseNotesTemp$releaseNotes"
+
+# 3. JSON-encode whole string for GH API transfer
+releaseNotes=$(printf '%s' "$releaseNotes" | python -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
+
+# 4. remove extra quotes returned by python (dummy but whatever)
+releaseNotes=${releaseNotes:1:-1}
+
+#Update current GH release record
+echo " - updating release notes and pre-release flag:"
+
+curlData="{\"body\": \"$releaseNotes\",\"prerelease\": $RELEASE_PRE}"
+echo "   <data.begin>$curlData<data.end>"
+echo
+
+curl --data "$curlData" "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID?access_token=$GITHUB_TOKEN"
+if [ $? -ne 0 ]; then echo "FAILED: $? => aborting"; exit 1; fi
+
+echo " - release record successfully updated"
+
 set +e
