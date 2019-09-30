@@ -47,21 +47,40 @@ echo \#define ARDUINO_ESP32_RELEASE \"$ver_define\" >> "$PKG_DIR/cores/esp32/cor
 echo "Creating ZIP ..."
 pushd "$OUTPUT_DIR" >/dev/null
 zip -qr "$PKG_ZIP" "$PKG_NAME"
-if [ $? -ne 0 ]; then echo "ERROR: Failed to create $PKG_ZIP (errno: $?) => aborting"; exit 1; fi
+if [ $? -ne 0 ]; then echo "ERROR: Failed to create $PKG_ZIP ($?)"; exit 1; fi
 
 echo "Calculating SHA sum ..."
 export PKG_PATH="$OUTPUT_DIR/$PKG_ZIP"
 export PKG_SHA=`shasum -a 256 "$PKG_ZIP" | cut -f 1 -d ' '`
-export PKG_SIZE=`ls -l "$PKG_ZIP" | awk '{print $5}'`
+export PKG_SIZE=`get_file_size "$PKG_ZIP"`
 popd >/dev/null
 rm -rf "$PKG_DIR"
 echo "'$PKG_ZIP' Created! Size: $PKG_SIZE, SHA256: $PKG_SHA"
 
+function git_safe_upload_asset(){
+	local file="$1"
+	local name=$(basename "$file")
+	local size=`get_file_size "$file"`
+	local upload_res=`git_upload_asset "$file"`
+	if [ $? -ne 0 ]; then 
+		echo "ERROR: Failed to upload '$name' ($?)"
+		return 1
+	fi
+	up_size=`echo "$upload_res" | jq -r '.size'`
+	if [ "$up_size" -ne "$size" ]; then
+	    echo "ERROR: Uploaded size does not match! $up_size != $size"
+	    #git_delete_asset
+	    return 1
+	fi
+	echo "$upload_res" | jq -r '.browser_download_url'
+	return $?
+}
+
 echo "Uploading package to release page ..."
-pkg_size=`git_upload_asset "$PKG_PATH" | jq -r '.size'`
-if [ "$pkg_size" -ne "$PKG_SIZE" ]; then
-    echo "ERROR: PKG Size does not match! $pkg_size != $PKG_SIZE"
-    exit 1
+export PKG_URL=`git_safe_upload_asset "$PKG_PATH"`
+if [ $? -ne 0 ]; then 
+	echo "ERROR: Failed to upload $PKG_ZIP ($?)"
+	exit 1
 fi
 echo "Package Uploaded"
 echo ""

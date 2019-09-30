@@ -27,10 +27,23 @@ if [ ! $action == "published" ]; then
 	exit 0
 fi
 
+function get_file_size(){
+    local file="$1"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        eval `stat -s "$file"`
+        local res="$?"
+        echo "$st_size"
+        return $res
+    else
+        stat --printf="%s" "$file"
+        return $?
+    fi
+}
+
 function git_upload_asset(){
     local name=$(basename "$1")
-    local mime=$(file -b --mime-type "$1")
-    curl -k -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.raw+json" -H "Content-Type: $mime" --data "@$1" "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=$name"
+    # local mime=$(file -b --mime-type "$1")
+    curl -k -X POST -sH "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.raw+json" -H "Content-Type: application/octet-stream" -data-binary @"$1" "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=$name"
 }
 
 function git_upload_to_pages(){
