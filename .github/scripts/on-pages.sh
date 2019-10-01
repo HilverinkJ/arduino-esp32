@@ -1,0 +1,8 @@
+#/bin/bash
+
+
+EVENT_JSON=`cat $GITHUB_EVENT_PATH`
+echo "Event: $GITHUB_EVENT_NAME, Repo: $GITHUB_REPOSITORY, Path: $GITHUB_WORKSPACE, Ref: $GITHUB_REF"
+echo
+echo $EVENT_JSON
+echo
