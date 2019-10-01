@@ -97,7 +97,7 @@ for page in $pages_added; do
 	fi
 	echo "Adding '$page' to pages ..."
 	if [[ $page == "README.md" ]]; then
-		git_safe_upload_to_pages "README.md" "index.md"
+		git_safe_upload_to_pages "index.md" "README.md"
 	else
 		git_safe_upload_to_pages "$page" "$page"
 	fi
@@ -109,7 +109,7 @@ for page in $pages_modified; do
 	fi
 	echo "Modifying '$page' ..."
 	if [[ $page == "README.md" ]]; then
-		git_safe_upload_to_pages "README.md" "index.md"
+		git_safe_upload_to_pages "index.md" "README.md"
 	else
 		git_safe_upload_to_pages "$page" "$page"
 	fi
