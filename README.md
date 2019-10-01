@@ -45,4 +45,3 @@ Finally, if you're sure no one else had the issue, follow the [ISSUE_TEMPLATE](d
 ### Hint
 
 Sometimes to program ESP32 via serial you must keep GPIO0 LOW during the programming process
-
