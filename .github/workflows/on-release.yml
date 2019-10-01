@@ -14,7 +14,7 @@ jobs:
     - name: Build Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: bash ./tools/ci/on-release.sh
+      run: bash ./.github/scripts/on-release.sh
     - name: Upload build artifacts
       uses: actions/upload-artifact@v1
       with:
