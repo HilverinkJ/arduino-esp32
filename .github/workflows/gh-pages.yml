@@ -1,1 +1,19 @@
 
+name: GitHub Pages CI
+
+on:
+  push:
+    branches:
+    - master
+    paths:
+    - 'README.md'
+    - 'docs/**'
+
+jobs:
+
+  build-pages:
+    name: Build GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+    - name: Copy Files
+      run: env
