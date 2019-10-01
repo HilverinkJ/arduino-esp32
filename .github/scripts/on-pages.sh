@@ -1,5 +1,72 @@
 #/bin/bash
+set -e
 
+#git_remove_from_pages <file>
+function git_remove_from_pages(){
+    local path=$1
+    local info=`curl -s -k -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.object+json" -X GET "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/$path?ref=gh-pages"`
+    local type=`echo "$info" | jq -r '.type'`
+    if [ ! $type == "file" ]; then
+        echo "Wrong type '$type'"
+        return 0
+    fi
+    local sha=`echo "$finfo" | jq -r '.sha'`
+    local message="Deleting "$(basename $path)
+    local json="{\"branch\":\"gh-pages\",\"message\":\"$message\",\"sha\":\"$sha\"}"
+    echo "$json" | curl -s -k -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.raw+json" -X DELETE --data @- "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/$path"
+}
+
+function git_upload_to_pages(){
+    local path=$1
+    local src=$2
+
+    if [ ! -f "$src" ]; then
+        >&2 echo "Input is not a file! Aborting..."
+        return 1
+    fi
+
+    local info=`curl -s -k -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.object+json" -X GET "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/$path?ref=gh-pages"`
+    local type=`echo "$info" | jq -r '.type'`
+    local message=$(basename $path)
+    local sha=""
+    local content=""
+
+    if [ $type == "file" ]; then
+        sha=`echo "$info" | jq -r '.sha'`
+        sha=",\"sha\":\"$sha\""
+        message="Updating $message"
+    elif [ ! $type == "null" ]; then
+        >&2 echo "Wrong type '$type'"
+        return 1
+    else
+        message="Creating $message"
+    fi
+
+    content=`base64 -i "$src"`
+    data="{\"branch\":\"gh-pages\",\"message\":\"$message\",\"content\":\"$content\"$sha}"
+
+    echo "$data" | curl -s -k -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.raw+json" -X PUT --data @- "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/$path"
+}
+
+function git_safe_upload_to_pages(){
+    local path=$1
+    local file="$2"
+    local name=$(basename "$file")
+    local size=`get_file_size "$file"`
+    local upload_res=`git_upload_to_pages "$path" "$file"`
+    if [ $? -ne 0 ]; then 
+        >&2 echo "ERROR: Failed to upload '$name' ($?)"
+        return 1
+    fi
+    up_size=`echo "$upload_res" | jq -r '.content.size'`
+    if [ $up_size -ne $size ]; then
+        >&2 echo "ERROR: Uploaded size does not match! $up_size != $size"
+        #git_delete_asset
+        return 1
+    fi
+    echo "$upload_res" | jq -r '.content.download_url'
+    return $?
+}
 
 EVENT_JSON=`cat $GITHUB_EVENT_PATH`
 
@@ -21,6 +88,11 @@ for page in $pages_added; do
 		continue
 	fi
 	echo "Adding '$page' to pages ..."
+	if [[ $page == "README.md" ]]; then
+		git_safe_upload_to_pages "README.md" "index.md"
+	else
+		git_safe_upload_to_pages "$page" "$page"
+	fi
 done
 
 for page in $pages_modified; do
@@ -29,6 +101,11 @@ for page in $pages_modified; do
 		continue
 	fi
 	echo "Modifying '$page' ..."
+	if [[ $page == "README.md" ]]; then
+		git_safe_upload_to_pages "README.md" "index.md"
+	else
+		git_safe_upload_to_pages "$page" "$page"
+	fi
 done
 
 for page in $pages_removed; do
@@ -37,4 +114,12 @@ for page in $pages_removed; do
 		continue
 	fi
 	echo "Removing '$page' from pages ..."
+	if [[ $page == "README.md" ]]; then
+		git_remove_from_pages "README.md"
+	else
+		git_remove_from_pages "$page"
+	fi
 done
+
+echo "DONE!"
+echo
