@@ -28,6 +28,9 @@ elif [ "$CHUNK_INDEX" -eq "$CHUNKS_CNT" ]; then
 	BUILD_PIO=1
 fi
 
+echo "Updating submodules ..."
+git -C "$GITHUB_WORKSPACE" submodule update --init --recursive > /dev/null 2>&1
+
 if [ "$BUILD_PIO" -eq 0 ]; then
 	# ArduinoIDE Test
 	FQBN="espressif:esp32:esp32:PSRAM=enabled,PartitionScheme=huge_app"
