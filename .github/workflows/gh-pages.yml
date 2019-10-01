@@ -15,5 +15,6 @@ jobs:
     name: Build GitHub Pages
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v1
     - name: Copy Files
-      run: env
+      run: bash ./.github/scripts/on-pages.sh
