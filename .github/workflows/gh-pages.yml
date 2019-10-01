@@ -17,4 +17,6 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Copy Files
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: bash ./.github/scripts/on-pages.sh
