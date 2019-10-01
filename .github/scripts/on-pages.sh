@@ -1,6 +1,19 @@
 #/bin/bash
 set -e
 
+function get_file_size(){
+    local file="$1"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        eval `stat -s "$file"`
+        local res="$?"
+        echo "$st_size"
+        return $res
+    else
+        stat --printf="%s" "$file"
+        return $?
+    fi
+}
+
 #git_remove_from_pages <file>
 function git_remove_from_pages(){
     local path=$1
