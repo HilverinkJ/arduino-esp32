@@ -1,4 +1,4 @@
-Installation instructions for using PlatformIO blah
+Installation instructions for using PlatformIO
 =================================================
 
 - [What is PlatformIO?](https://docs.platformio.org/en/latest/what-is-platformio.html?utm_source=github&utm_medium=arduino-esp32)
