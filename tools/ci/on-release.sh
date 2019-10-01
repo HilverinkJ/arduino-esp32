@@ -326,7 +326,7 @@ fi
 
 # Append Commit Messages
 if [ ! -z "$COMMITS_SINCE_RELEASE" ] && [ "$COMMITS_SINCE_RELEASE" != "null" ]; then
-    echo "Getting commits from $COMMITS_SINCE_RELEASE ..."
+    echo "Getting commits since $COMMITS_SINCE_RELEASE ..."
     commitFile=$OUTPUT_DIR/commits.txt
     git -C "$GITHUB_WORKSPACE" log --oneline $COMMITS_SINCE_RELEASE.. > "$OUTPUT_DIR/commits.txt"
     releaseNotes+=$'\r\n##### Commits\r\n'
