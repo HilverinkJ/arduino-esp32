@@ -7,7 +7,11 @@ function git_remove_from_pages(){
     local info=`curl -s -k -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.object+json" -X GET "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/$path?ref=gh-pages"`
     local type=`echo "$info" | jq -r '.type'`
     if [ ! $type == "file" ]; then
-        echo "Wrong type '$type'"
+    	if [ ! $type == "null" ]; then
+        	echo "Wrong type '$type'"
+    	else
+    		echo "File is not on Pages"
+    	fi
         return 0
     fi
     local sha=`echo "$finfo" | jq -r '.sha'`
@@ -74,17 +78,8 @@ pages_added=`echo "$EVENT_JSON" | jq -r '.commits[].added[]'`
 pages_modified=`echo "$EVENT_JSON" | jq -r '.commits[].modified[]'`
 pages_removed=`echo "$EVENT_JSON" | jq -r '.commits[].removed[]'`
 
-echo "Event: $GITHUB_EVENT_NAME, Repo: $GITHUB_REPOSITORY, Path: $GITHUB_WORKSPACE, Ref: $GITHUB_REF"
-echo
-echo "Commits: "
-echo "  Added: $pages_added"
-echo "  Modified: $pages_modified"
-echo "  Removed: $pages_removed"
-echo
-
 for page in $pages_added; do
 	if [[ $page != "README.md" && $page != "docs/"* ]]; then
-		echo "Skipping '$page'"
 		continue
 	fi
 	echo "Adding '$page' to pages ..."
@@ -97,7 +92,6 @@ done
 
 for page in $pages_modified; do
 	if [[ $page != "README.md" && $page != "docs/"* ]]; then
-		echo "Skipping '$page'"
 		continue
 	fi
 	echo "Modifying '$page' ..."
@@ -110,7 +104,6 @@ done
 
 for page in $pages_removed; do
 	if [[ $page != "README.md" && $page != "docs/"* ]]; then
-		echo "Skipping '$page'"
 		continue
 	fi
 	echo "Removing '$page' from pages ..."
@@ -121,5 +114,5 @@ for page in $pages_removed; do
 	fi
 done
 
-echo "DONE!"
 echo
+echo "DONE!"
