@@ -220,13 +220,14 @@ PACKAGE_SIZE=`get_file_size "$PACKAGE_ZIP"`
 popd >/dev/null
 rm -rf "$PKG_DIR"
 echo "'$PACKAGE_ZIP' Created! Size: $PACKAGE_SIZE, SHA-256: $PACKAGE_SHA"
+echo
 
 # Upload package to release page
 echo "Uploading package to release page ..."
 PACKAGE_URL=`git_safe_upload_asset "$PACKAGE_PATH"`
 echo "Package Uploaded"
 echo "Download URL: $PACKAGE_URL"
-echo ""
+echo
 
 ##
 ## PACKAGE JSON
@@ -264,9 +265,6 @@ COMMITS_SINCE_RELEASE="$prev_any_release"
 shopt -u nocasematch
 set -e
 
-echo "Previous Release: $prev_release"
-echo "Previous (any)release: $prev_any_release"
-
 # Merge package JSONs with previous releases
 if [ ! -z "$prev_any_release" ] && [ "$prev_any_release" != "null" ]; then
     echo "Merging with JSON from $prev_any_release ..."
@@ -280,6 +278,10 @@ if [ "$RELEASE_PRE" == "false" ]; then
         merge_package_json "$prev_release/$PACKAGE_JSON_REL" "$OUTPUT_DIR/$PACKAGE_JSON_REL"
     fi
 fi
+
+echo "Previous Release: $prev_release"
+echo "Previous (any)release: $prev_any_release"
+echo
 
 # Upload package JSONs
 echo "Uploading $PACKAGE_JSON_DEV ..."
@@ -375,4 +377,4 @@ set +e
 ##
 ## DONE
 ##
-
+echo "DONE!"
