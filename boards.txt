@@ -12,6 +12,7 @@ menu.Revision=Board Revision
 ### DO NOT PUT BOARDS ABOVE THE OFFICIAL ESPRESSIF BOARDS! ###
 ##############################################################
 
+
 esp32.name=ESP32 Dev Module
 
 esp32.upload.tool=esptool_py
