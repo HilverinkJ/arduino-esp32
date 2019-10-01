@@ -27,7 +27,7 @@ function git_remove_from_pages(){
     	fi
         return 0
     fi
-    local sha=`echo "$finfo" | jq -r '.sha'`
+    local sha=`echo "$info" | jq -r '.sha'`
     local message="Deleting "$(basename $path)
     local json="{\"branch\":\"gh-pages\",\"message\":\"$message\",\"sha\":\"$sha\"}"
     echo "$json" | curl -s -k -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.raw+json" -X DELETE --data @- "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/$path"
@@ -121,9 +121,9 @@ for page in $pages_removed; do
 	fi
 	echo "Removing '$page' from pages ..."
 	if [[ $page == "README.md" ]]; then
-		git_remove_from_pages "README.md"
+		git_remove_from_pages "README.md" > /dev/null
 	else
-		git_remove_from_pages "$page"
+		git_remove_from_pages "$page" > /dev/null
 	fi
 done
 
