@@ -10,14 +10,14 @@
         {
           "category": "ESP32", 
           "name": "esp32", 
-          "url": "https://github.com/me-no-dev/arduino-esp32/releases/download/1.0.4-rc1/esp32-1.0.4-rc1.zip", 
-          "checksum": "SHA-256:b9dd0147e4696f55a7d2c0b9a7ce2701bf96c7f685d3c8bcff59ca1797873b0e", 
+          "url": "https://github.com/me-no-dev/arduino-esp32/releases/download/1.0.4-rc2/esp32-1.0.4-rc2.zip", 
+          "checksum": "SHA-256:bdf5f0ae25d9e08d6a4bc107bfe7d14673f9575a5d3420ddde3d539dde662981", 
           "help": {
             "online": ""
           }, 
-          "version": "1.0.4-rc1", 
+          "version": "1.0.4-rc2", 
           "architecture": "esp32", 
-          "archiveFileName": "esp32-1.0.4-rc1.zip", 
+          "archiveFileName": "esp32-1.0.4-rc2.zip", 
           "boards": [
             {
               "name": "ESP32 Dev Module"
@@ -50,15 +50,14 @@
         }, 
         {
           "category": "ESP32", 
-          "name": "esp32", 
-          "url": "https://github.com/me-no-dev/arduino-esp32/releases/download/1.0.4-rc0/esp32-1.0.4-rc0.zip", 
-          "checksum": "SHA-256:6d35d1320304aac2afbb34bfa312163fc6dc7957c96952226dbed74999b6445b", 
           "help": {
             "online": ""
           }, 
-          "version": "1.0.4-rc0", 
+          "url": "https://github.com/me-no-dev/arduino-esp32/releases/download/1.0.4-rc1/esp32-1.0.4-rc1.zip", 
+          "checksum": "SHA-256:b9dd0147e4696f55a7d2c0b9a7ce2701bf96c7f685d3c8bcff59ca1797873b0e", 
+          "version": "1.0.4-rc1", 
           "architecture": "esp32", 
-          "archiveFileName": "esp32-1.0.4-rc0.zip", 
+          "archiveFileName": "esp32-1.0.4-rc1.zip", 
           "boards": [
             {
               "name": "ESP32 Dev Module"
@@ -70,6 +69,7 @@
               "name": "WEMOS D1 MINI ESP32"
             }
           ], 
+          "size": "36835559", 
           "toolsDependencies": [
             {
               "packager": "esp32", 
@@ -87,7 +87,48 @@
               "name": "mkspiffs"
             }
           ], 
-          "size": "36835559"
+          "name": "esp32"
+        }, 
+        {
+          "category": "ESP32", 
+          "help": {
+            "online": ""
+          }, 
+          "url": "https://github.com/me-no-dev/arduino-esp32/releases/download/1.0.4-rc0/esp32-1.0.4-rc0.zip", 
+          "checksum": "SHA-256:6d35d1320304aac2afbb34bfa312163fc6dc7957c96952226dbed74999b6445b", 
+          "version": "1.0.4-rc0", 
+          "architecture": "esp32", 
+          "archiveFileName": "esp32-1.0.4-rc0.zip", 
+          "boards": [
+            {
+              "name": "ESP32 Dev Module"
+            }, 
+            {
+              "name": "WEMOS LoLin32"
+            }, 
+            {
+              "name": "WEMOS D1 MINI ESP32"
+            }
+          ], 
+          "size": "36835559", 
+          "toolsDependencies": [
+            {
+              "packager": "esp32", 
+              "version": "1.22.0-80-g6c4433a-5.2.0", 
+              "name": "xtensa-esp32-elf-gcc"
+            }, 
+            {
+              "packager": "esp32", 
+              "version": "2.6.1", 
+              "name": "esptool_py"
+            }, 
+            {
+              "packager": "esp32", 
+              "version": "0.2.3", 
+              "name": "mkspiffs"
+            }
+          ], 
+          "name": "esp32"
         }
       ], 
       "tools": [
