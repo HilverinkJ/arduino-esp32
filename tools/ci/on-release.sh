@@ -27,7 +27,7 @@ RELEASE_BODY=`echo $EVENT_JSON | jq -r '.release.body'`
 
 OUTPUT_DIR="$GITHUB_WORKSPACE/build"
 PACKAGE_NAME="esp32-$RELEASE_TAG"
-PACKAGE_JSON_MERGE="$GITHUB_WORKSPACE/package/merge_packages.py"
+PACKAGE_JSON_MERGE="$GITHUB_WORKSPACE/.github/scripts/merge_packages.py"
 PACKAGE_JSON_TEMPLATE="$GITHUB_WORKSPACE/package/package_esp32_index.template.json"
 PACKAGE_JSON_DEV="package_esp32_dev_index.json"
 PACKAGE_JSON_REL="package_esp32_index.json"
